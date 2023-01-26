@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0svxysb" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="noodles_process" name="Noodles Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1vqi2xw</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="validate_ingredients" name="Validate ingredients and tools" camunda:delegateExpression="#{validateIngredients}">
+      <bpmn:incoming>Flow_1vqi2xw</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nsv7zi</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="can_cook" name="Can we cook?">
+      <bpmn:incoming>Flow_0nsv7zi</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jbtsxc</bpmn:outgoing>
+      <bpmn:outgoing>Flow_19pp03b</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0jbtsxc" name="Yes" sourceRef="can_cook" targetRef="lets_cook">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${IngredientsAvailable}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:eventBasedGateway id="isItReady" name="Is it ready?">
+      <bpmn:incoming>Flow_1qzp1m9</bpmn:incoming>
+      <bpmn:outgoing>Flow_07uyo3p</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0ipnmqw</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_1ppmipi" name="It is ready">
+      <bpmn:incoming>Flow_07uyo3p</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rig0gz</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_083wkyr" messageRef="Message_3sla5hf" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_07uyo3p" sourceRef="isItReady" targetRef="Event_1ppmipi" />
+    <bpmn:intermediateCatchEvent id="Event_14wxqrx" name="Forgot to check">
+      <bpmn:incoming>Flow_0ipnmqw</bpmn:incoming>
+      <bpmn:outgoing>Flow_034lt4o</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0l0jeta">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0ipnmqw" sourceRef="isItReady" targetRef="Event_14wxqrx" />
+    <bpmn:sequenceFlow id="Flow_1rig0gz" sourceRef="Event_1ppmipi" targetRef="lets_eat" />
+    <bpmn:sequenceFlow id="Flow_034lt4o" sourceRef="Event_14wxqrx" targetRef="order_online" />
+    <bpmn:serviceTask id="order_online" name="Order online" camunda:delegateExpression="#{orderOnline}">
+      <bpmn:incoming>Flow_034lt4o</bpmn:incoming>
+      <bpmn:incoming>Flow_19pp03b</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dtqz2h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_0l9b43t">
+      <bpmn:incoming>Flow_0dtqz2h</bpmn:incoming>
+      <bpmn:incoming>Flow_00e5eem</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0dtqz2h" sourceRef="order_online" targetRef="Event_0l9b43t" />
+    <bpmn:sequenceFlow id="Flow_00e5eem" sourceRef="lets_eat" targetRef="Event_0l9b43t" />
+    <bpmn:sequenceFlow id="Flow_19pp03b" name="No" sourceRef="can_cook" targetRef="order_online">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!IngredientsAvailable}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="lets_cook" name="Let&#39;s cook" camunda:delegateExpression="#{letsCook}">
+      <bpmn:incoming>Flow_0jbtsxc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qzp1m9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1vqi2xw" sourceRef="StartEvent_1" targetRef="validate_ingredients" />
+    <bpmn:sequenceFlow id="Flow_0nsv7zi" sourceRef="validate_ingredients" targetRef="can_cook" />
+    <bpmn:sequenceFlow id="Flow_1qzp1m9" sourceRef="lets_cook" targetRef="isItReady" />
+    <bpmn:serviceTask id="lets_eat" name="Let&#39;s eat" camunda:delegateExpression="#{letsEat}">
+      <bpmn:incoming>Flow_1rig0gz</bpmn:incoming>
+      <bpmn:outgoing>Flow_00e5eem</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_3sla5hf" name="noodleCooked" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="noodles_process">
+      <bpmndi:BPMNShape id="Gateway_04bqex4_di" bpmnElement="can_cook" isMarkerVisible="true">
+        <dc:Bounds x="595" y="102" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="585" y="78" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1pocqw5_di" bpmnElement="isItReady">
+        <dc:Bounds x="855" y="102" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="853" y="78" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ppmipi_di" bpmnElement="Event_1ppmipi">
+        <dc:Bounds x="962" y="109" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="957" y="152" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_14wxqrx_di" bpmnElement="Event_14wxqrx">
+        <dc:Bounds x="962" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="942" y="265" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xrj6hm_di" bpmnElement="order_online">
+        <dc:Bounds x="1060" y="200" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0l9b43t_di" bpmnElement="Event_0l9b43t">
+        <dc:Bounds x="1262" y="162" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="109" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0js0ttn_di" bpmnElement="validate_ingredients">
+        <dc:Bounds x="350" y="87" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xo5oy4_di" bpmnElement="lets_cook">
+        <dc:Bounds x="710" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ccbtvz_di" bpmnElement="lets_eat">
+        <dc:Bounds x="1060" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0nsv7zi_di" bpmnElement="Flow_0nsv7zi">
+        <di:waypoint x="450" y="127" />
+        <di:waypoint x="595" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jbtsxc_di" bpmnElement="Flow_0jbtsxc">
+        <di:waypoint x="645" y="127" />
+        <di:waypoint x="710" y="127" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="652" y="90" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19pp03b_di" bpmnElement="Flow_19pp03b">
+        <di:waypoint x="620" y="152" />
+        <di:waypoint x="620" y="330" />
+        <di:waypoint x="1110" y="330" />
+        <di:waypoint x="1110" y="280" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="632" y="163" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qzp1m9_di" bpmnElement="Flow_1qzp1m9">
+        <di:waypoint x="810" y="127" />
+        <di:waypoint x="855" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07uyo3p_di" bpmnElement="Flow_07uyo3p">
+        <di:waypoint x="905" y="127" />
+        <di:waypoint x="962" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ipnmqw_di" bpmnElement="Flow_0ipnmqw">
+        <di:waypoint x="880" y="152" />
+        <di:waypoint x="880" y="240" />
+        <di:waypoint x="962" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rig0gz_di" bpmnElement="Flow_1rig0gz">
+        <di:waypoint x="998" y="127" />
+        <di:waypoint x="1060" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_034lt4o_di" bpmnElement="Flow_034lt4o">
+        <di:waypoint x="998" y="240" />
+        <di:waypoint x="1060" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00e5eem_di" bpmnElement="Flow_00e5eem">
+        <di:waypoint x="1160" y="127" />
+        <di:waypoint x="1211" y="127" />
+        <di:waypoint x="1211" y="180" />
+        <di:waypoint x="1262" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dtqz2h_di" bpmnElement="Flow_0dtqz2h">
+        <di:waypoint x="1160" y="240" />
+        <di:waypoint x="1211" y="240" />
+        <di:waypoint x="1211" y="180" />
+        <di:waypoint x="1262" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vqi2xw_di" bpmnElement="Flow_1vqi2xw">
+        <di:waypoint x="188" y="127" />
+        <di:waypoint x="350" y="127" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,52 @@
+# Server config
+server:
+  port: 8888
+  servlet:
+    context-path: /noodles
+
+application:
+    database:
+      schema:
+        name: noodle_application
+
+# Spring config
+spring:
+  sql:
+    init:
+      continue-on-error: true
+  application:
+    name: noodles
+
+  datasource:
+    url: jdbc:h2:file:./camunda-h2-database
+    driverClassName: org.h2.Driver
+
+
+    hikari:
+      minimumIdle: 5
+      maximumPoolSize: 50
+      connectionTimeout: 2000
+
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+camunda:
+  bpm:
+    admin-user:
+      id: noodles
+      password: noodles
+
+    metrics:
+      db-reporter-activate: true
+    database:
+      schema-update: drop-create
+#jdbc:h2:C:/Users/olaar/Desktop/Projects/Noodles/camunda-h2-database
